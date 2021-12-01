@@ -30,25 +30,39 @@ Any call that mutates the user account state e.g:transfers, withdraw, short, lon
     
 ### 2. Data Processing:
 
-A simple module that unifies the diverse data model structures from each API into a single normalized data structure. Multiple Data Views can be generated here but the main one has the following equivalent json format
+A simple module that unifies the diverse data model structures from each API into a single normalized data structure. Multiple Data Views can be generated here but the main one has the following equivalent the following format (python syntax):
 
-```json
-{   
-    "event_time": 324324234, // utc timestamp
-    "binance": {
-        "symbol":"BNBUSDT",     // symbol
-        "top_bid":"25.35190000", // best bid price
-        "top_bid_quantity":"31.21000000", // best bid qty
-        "top_ask":"25.36520000", // best ask price
-        "top_ask_quantity":"40.66000000"  // best ask qty
-  
-},
-    "bybit": {
-        "symbol":"BNBUSDT",     // symbol
-        "top_bid":"25.35190000", // best bid price
-        "top_bid_quantity":"31.21000000", // best bid qty
-        "top_ask":"25.36520000", // best ask price
-        "top_ask_quantity":"40.66000000"  // best ask qty
+A dict with the keys: 
+
+- event_time (timestamp); 
+
+- bids: 
+    
+    Inner dict with symbols as keys and the respective values are lists of 2 tuples contaning exchange name and the value for highest and lowest bids for each symbol; 
+
+- asks:
+
+    Inner dict with symbols as keys and the respective values are lists of 2 tuples contaning exchange name and the value for lowest and highest asks for each symbol;
+
+```python
+{   "event_time": 324324234, # utc timestamp
+    
+    # dicts of bids for each coin (descending)
+    "bids": {
+        # list with a pair of tuple (highest and lowest bids for the given symbol)
+        "COIN1_NAME": [("exchange_highest_bider_name", 10000),("exchange_lowest_bider_name", 1)],
+        # list with a pair ... for the second symbol
+        "COIN2_NAME": [("exchange_highest_bider_name", 10000),("exchange_lowest_bider_name", 1)],
+        # nth symbol
+    },
+    
+    # dict of asks for each coin (ascending) 
+    "asks": {
+        # list with a pair of tuple (lowest and highest asks for the given symbol)   
+        "COIN1_NAME": [("exchange_lowest_asker_name", 1),("exchange_highest_asker_name", 10000)],
+        # list with a pair ... for the second symbol
+        "COIN2_NAME": [("exchange_lowest_asker_name", 1),("exchange_highest_asker_name", 10000)],
+        # ... nth symbol
     }
 }
 
