@@ -22,7 +22,11 @@ Each exchange has its own submodule divided into:
 
 Basically read data from the exchange e.g.:ticks,account balance;
 
-The data reads will be consumed by independent datasockets, maybe later we may breakdown into aseparate microservice for each api
+The data reads will be consumed by independent api data fetchs within a controlled interval;
+
+Websockets are available, but due to the lack of support for some exchanges and simplicity, we will postpone its implementation.
+
+maybe later we may breakdown into a separate microservice for each api
 
 ### - Actions:
     
@@ -102,7 +106,7 @@ The program is not that flexible yet, it doesn't aim for a high level of user in
 
 1. initialize the environment, in this directory run:  
 
-``` bash
+``` shell
 $ virtualenv -p <your-python-version> env
 
 $ source env/bin/activate
