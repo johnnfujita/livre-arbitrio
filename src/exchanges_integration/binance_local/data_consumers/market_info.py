@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from binance import AsyncClient
 import time
@@ -33,7 +33,7 @@ async def get_ticks(client: AsyncClient, symbol: str):
             time.sleep(1)
         time.sleep(0.2) 
 
-async def get_orderbook_ticks(client: AsyncClient, symbol: Optional[str] = None):
+async def get_orderbook_ticks(client: AsyncClient, symbol: Optional[List[str]] = None):
     """
     Get the ticker for a symbol
     """
@@ -41,7 +41,7 @@ async def get_orderbook_ticks(client: AsyncClient, symbol: Optional[str] = None)
         try:
             prices =  await client.get_orderbook_tickers()
             if symbol:
-                prices = [price for price in prices if price["symbol"] == symbol]
+                prices = [price for price in prices if price["symbol"] in symbol]
                 
             else:
                 prices = [price for price in prices]

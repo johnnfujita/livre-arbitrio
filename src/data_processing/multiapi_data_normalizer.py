@@ -8,6 +8,12 @@ import pandas as pd
 
 from .data_models import BinanceModel
 
+def kafka_serializer(message)-> None:
+    """
+    Serializer for kafka message
+    """
+    return json.dumps(message).encode("utf-8")
+   
 
 async def generate_ordered_trades_for_each_exchange(exchanges_data: list ):
     bids_unordered = {}
@@ -15,13 +21,13 @@ async def generate_ordered_trades_for_each_exchange(exchanges_data: list ):
     
     for exchange_data_item in exchanges_data:
         exchange_name = exchange_data_item["exchange_name"]
-        print(exchange_name)
+        
         if exchange_name == "binance":
-            print(exchange_data_item["data"])
+           
             for item in exchange_data_item["data"]:
                 if item["symbol"] not in bids_unordered.keys():
                     bids_unordered[item["symbol"]] = [(exchange_name, item["bidPrice"])]
-                    print("passei no nao tem do binace", item["symbol"])
+                    
                 else:
                     bids_unordered[item["symbol"]].append((exchange_name, item["bidPrice"]))
                 if item["symbol"] not in asks_unordered.keys():
