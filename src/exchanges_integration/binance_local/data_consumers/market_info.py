@@ -33,15 +33,15 @@ async def get_ticks(client: AsyncClient, symbol: str):
             time.sleep(1)
         time.sleep(0.2) 
 
-async def get_orderbook_ticks(client: AsyncClient, symbol: Optional[List[str]] = None):
+async def get_orderbook_ticks(client: AsyncClient, symbols: Optional[List[str]] = None):
     """
     Get the ticker for a symbol
     """
     while True:
         try:
             prices =  await client.get_orderbook_tickers()
-            if symbol:
-                prices = [price for price in prices if price["symbol"] in symbol]
+            if symbols:
+                prices = [price for price in prices if price["symbol"] in symbols]
                 
             else:
                 prices = [price for price in prices]
@@ -49,7 +49,9 @@ async def get_orderbook_ticks(client: AsyncClient, symbol: Optional[List[str]] =
         except Exception as e:
             print(e)
             time.sleep(1)
-        time.sleep(0.2) 
+        time.sleep(0.2)
+
+
 
 async def get_coin_stream(base_url: str, symbol: str, stream_type: Optional[str] = "ticker"):
     """

@@ -8,73 +8,62 @@ import pandas as pd
 
 from .data_models import BinanceModel
 
-def kafka_serializer(message)-> None:
+from data_processing.bybit_data_processing import get_bybit_unordered_bids_and_ask
+from data_processing.binance_data_processing import get_binance_unordered_bids_and_asks
+from data_processing.kraken_data_processing import get_kraken_unordered_bids_and_ask
+
+
+def kafka_serializer(message) -> None:
     """
     Serializer for kafka message
     """
     return json.dumps(message).encode("utf-8")
-   
 
-async def generate_ordered_trades_for_each_exchange(exchanges_data: list ):
+
+async def generate_ordered_trades_for_each_exchange(exchanges_data: list):
     bids_unordered = {}
     asks_unordered = {}
-    
+
     for exchange_data_item in exchanges_data:
         exchange_name = exchange_data_item["exchange_name"]
-        
+
         if exchange_name == "binance":
-           
-            for item in exchange_data_item["data"]:
-                if item["symbol"] not in bids_unordered.keys():
-                    bids_unordered[item["symbol"]] = [(exchange_name, item["bidPrice"])]
-                    
-                else:
-                    bids_unordered[item["symbol"]].append((exchange_name, item["bidPrice"]))
-                if item["symbol"] not in asks_unordered.keys():
-                    asks_unordered[item["symbol"]] = [(exchange_name, item["askPrice"])]
-                else:
-                    asks_unordered[item["symbol"]].append((exchange_name, item["askPrice"])) 
-        
-        ### SPECIFIC TO 
+
+            bids_unordered, asks_unordered = await get_binance_unordered_bids_and_asks(
+                exchange_name, exchange_data_item, bids_unordered, asks_unordered
+            )
+
         elif exchange_name == "bybit":
-            for item in exchange_data_item["data"]:
-                bid = item["bid_price"]
-                ask = item["ask_price"]
-                
-                if item["symbol"] not in bids_unordered.keys():
-                    bids_unordered[item["symbol"]] = [(exchange_name, bid)]
-                   
-                else:
-                    bids_unordered[item["symbol"]].append((exchange_name, bid))
-                    
-                if item["symbol"] not in asks_unordered.keys():
-                    asks_unordered[item["symbol"]] = [(exchange_name, ask)]
-                else:
-                    asks_unordered[item["symbol"]].append((exchange_name, ask))
-    
+            bids_unordered, asks_unordered = await get_bybit_unordered_bids_and_ask(
+                exchange_name, exchange_data_item, bids_unordered, asks_unordered
+            )
+
+        elif exchange_name == "kraken":
+            bids_unordered, asks_unordered = await get_kraken_unordered_bids_and_ask(
+                exchange_name, exchange_data_item, bids_unordered, asks_unordered
+            )
     # sorting bids and asks
     bids_ordered = {}
     asks_ordered = {}
 
     for key, value in bids_unordered.items():
-      
+
         value.sort(key=lambda x: float(x[1]), reverse=True)
-        
+
         bids_ordered[key] = value
-    
+
     for key, value in asks_unordered.items():
         value = value.sort(key=lambda x: float(x[1]))
         asks_ordered[key] = value
 
     return bids_ordered, asks_unordered
-    
+
 
 # stream = websockets.connect('wss://stream.binance.com:9443/stream?streams=adausdt@ticker')
 
 
-
 # def generate_data_model(data):
-   
+
 #     binance_ticker = BinanceModel(
 #         event_time=data["E"],
 #         symbol=str(data['s']),
@@ -106,15 +95,3 @@ async def generate_ordered_trades_for_each_exchange(exchanges_data: list ):
 
 #         binance_ticker = generate_data_model(data)
 #         create_data_frame(binance_ticker.dict())
-    
-   
-        
-        
-    
-          
-        
-
-
-
-if __name__ == '__main__':
-    asyncio.get_event_loop().run_until_complete(main())

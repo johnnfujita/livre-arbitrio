@@ -8,8 +8,8 @@ load_dotenv()
 if __name__ == "__main__":
 
     consumer = KafkaConsumer(
-        "high-bid-low-ask-low-latency",
-        bootstrap_servers="localhost:9092",
+        os.getenv("KAFKA_TOPIC"),
+        bootstrap_servers=os.getenv("KAFKA_BROKER_URL"),
         auto_offset_reset="earliest"
     )
     for message in consumer:
